@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AmbulanceIQ — Smart Navigation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #050a0f;
+    --dark: #0a1520;
+    --panel: #0d1e2e;
+    --border: #1a3a5c;
+    --blue: #0a6cf5;
+    --blue-bright: #1e90ff;
+    --blue-glow: rgba(10,108,245,0.35);
+    --green: #00e676;
+    --green-dark: #00c853;
+    --green-glow: rgba(0,230,118,0.3);
+    --red: #ff1744;
+    --red-dark: #d50000;
+    --red-glow: rgba(255,23,68,0.35);
+    --amber: #ff9100;
+    --text: #c8dff0;
+    --text-dim: #5a7a9a;
+    --white: #e8f4ff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--black);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(5,10,15,0.9);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 40px; height: 64px;
+  }
+  .logo {
+    display:flex; align-items:center; gap:12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem; font-weight:700;
+    letter-spacing:2px; color:var(--white);
+  }
+  .logo-icon {
+    width:38px; height:38px; background: var(--red);
+    border-radius:6px; display:grid; place-items:center;
+    font-size:1.3rem; animation: pulse-red 1.8s infinite;
+  }
+  @keyframes pulse-red {
+    0%,100%{ box-shadow:0 0 8px var(--red-glow); }
+    50%{ box-shadow:0 0 22px var(--red-glow), 0 0 40px var(--red-glow); }
+  }
+  .logo span { color: var(--blue-bright); }
+
+  nav { display:flex; gap:28px; align-items:center; }
+  nav a {
+    font-family:'Rajdhani',sans-serif; font-size:.95rem; font-weight:600;
+    letter-spacing:1.5px; color:var(--text-dim); text-decoration:none;
+    text-transform:uppercase; transition:.2s;
+  }
+  nav a:hover { color:var(--blue-bright); }
+  .nav-status {
+    display:flex; align-items:center; gap:8px;
+    font-family:'Share Tech Mono', monospace; font-size:.78rem; color:var(--green);
+  }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+  /* ── HERO ── */
+  .hero {
+    min-height:100vh; display:flex; align-items:center;
+    padding: 100px 60px 60px;
+    position:relative; overflow:hidden;
+  }
+  .hero-bg {
+    position:absolute; inset:0; z-index:0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(10,108,245,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,230,118,0.07) 0%, transparent 60%);
+  }
+  /* Grid overlay */
+  .hero-grid {
+    position:absolute; inset:0; z-index:0;
+    background-image: linear-gradient(rgba(10,108,245,0.07) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(10,108,245,0.07) 1px, transparent 1px);
+    background-size:50px 50px;
+    animation: grid-scroll 20s linear infinite;
+  }
+  @keyframes grid-scroll { to { background-position: 50px 50px; } }
+
+  .hero-content { position:relative; z-index:2; max-width:600px; }
+  .hero-tag {
+    display:inline-flex; align-items:center; gap:8px;
+    background: rgba(255,23,68,0.1); border:1px solid rgba(255,23,68,0.3);
+    border-radius:4px; padding:4px 14px;
+    font-family:'Share Tech Mono',monospace; font-size:.75rem;
+    color:var(--red); letter-spacing:2px; margin-bottom:24px;
+  }
+  .hero h1 {
+    font-family:'Rajdhani',sans-serif; font-size:clamp(2.8rem,6vw,5rem);
+    font-weight:700; line-height:1.05; letter-spacing:1px; color:var(--white);
+    margin-bottom:12px;
+  }
+  .hero h1 .accent { color:var(--blue-bright); }
+  .hero h1 .accent2 { color:var(--green); }
+  .hero p {
+    font-size:1.05rem; color:var(--text-dim); line-height:1.7;
+    margin-bottom:36px; font-weight:300;
+  }
+  .hero-btns { display:flex; gap:16px; flex-wrap:wrap; }
+  .btn-primary {
+    background: var(--blue); color:#fff;
+    padding:13px 32px; border:none; border-radius:6px;
+    font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;
+    letter-spacing:1.5px; cursor:pointer; text-transform:uppercase;
+    transition:.25s; box-shadow:0 0 20px var(--blue-glow);
+    text-decoration:none; display:inline-block;
+  }
+  .btn-primary:hover { background:var(--blue-bright); box-shadow:0 0 35px var(--blue-glow); transform:translateY(-2px); }
+  .btn-outline {
+    background:transparent; color:var(--green);
+    padding:12px 32px; border:1px solid var(--green);
+    border-radius:6px; font-family:'Rajdhani',sans-serif;
+    font-size:1rem; font-weight:700; letter-spacing:1.5px;
+    cursor:pointer; text-transform:uppercase; transition:.25s;
+    text-decoration:none; display:inline-block;
+  }
+  .btn-outline:hover { background:rgba(0,230,118,0.1); box-shadow:0 0 20px var(--green-glow); transform:translateY(-2px); }
+
+  /* ── LIVE DASHBOARD ── */
+  .dashboard {
+    position:absolute; right:60px; top:50%; transform:translateY(-50%);
+    width:440px; z-index:2;
+  }
+  @media(max-width:1100px){ .dashboard{ display:none; } }
+
+  .dash-panel {
+    background: var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px; overflow:hidden;
+    box-shadow:0 0 40px rgba(10,108,245,0.15);
+  }
+  .dash-header {
+    background: rgba(10,108,245,0.15);
+    border-bottom:1px solid var(--border);
+    padding:12px 20px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .dash-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; color:var(--blue-bright); }
+  .dash-live { font-family:'Share Tech Mono',monospace; font-size:.72rem; color:var(--green); display:flex; align-items:center; gap:6px; }
+
+  /* MAP AREA */
+  .map-area {
+    height:240px; background: #08131d;
+    position:relative; overflow:hidden;
+  }
+  .map-roads {
+    position:absolute; inset:0;
+  }
+  /* Animated route line */
+  .route-pulse {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+  }
+  .ambulance-icon {
+    position:absolute; font-size:1.5rem;
+    animation: move-ambulance 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px var(--red));
+    z-index:5;
+  }
+  @keyframes move-ambulance {
+    0%{ left:10%; top:70%; }
+    30%{ left:35%; top:50%; }
+    60%{ left:60%; top:30%; }
+    100%{ left:80%; top:20%; }
+  }
+  .traffic-light {
+    position:absolute; width:10px; height:10px; border-radius:50%;
+  }
+  .t-red { background:var(--red); box-shadow:0 0 8px var(--red); animation:traffic-blink 2s infinite; }
+  .t-green { background:var(--green); box-shadow:0 0 8px var(--green); }
+  .t-amber { background:var(--amber); box-shadow:0 0 8px var(--amber); animation:traffic-blink 1.5s 0.5s infinite; }
+  @keyframes traffic-blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  /* STATS ROW */
+  .stats-row {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--border);
+  }
+  .stat-cell {
+    padding:14px 16px;
+    border-right:1px solid var(--border);
+    text-align:center;
+  }
+  .stat-cell:last-child { border-right:none; }
+  .stat-val {
+    font-family:'Share Tech Mono',monospace;
+    font-size:1.5rem; font-weight:700;
+  }
+  .stat-val.red { color:var(--red); }
+  .stat-val.green { color:var(--green); }
+  .stat-val.blue { color:var(--blue-bright); }
+  .stat-label { font-size:.7rem; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+
+  /* AMBULANCE LIST */
+  .amb-list { padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
+  .amb-item {
+    display:flex; align-items:center; gap:12px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px;
+  }
+  .amb-num {
+    font-family:'Share Tech Mono',monospace; font-size:.8rem;
+    color:var(--blue-bright); min-width:60px;
+  }
+  .amb-bar-wrap { flex:1; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+  .amb-bar { height:100%; border-radius:3px; transition:width .5s ease; }
+  .bar-green { background:linear-gradient(90deg,var(--green-dark),var(--green)); box-shadow:0 0 6px var(--green-glow); }
+  .bar-amber { background:linear-gradient(90deg,#e65100,var(--amber)); }
+  .bar-red { background:linear-gradient(90deg,var(--red-dark),var(--red)); box-shadow:0 0 6px var(--red-glow); }
+  .amb-status { font-family:'Share Tech Mono',monospace; font-size:.72rem; min-width:60px; text-align:right; }
+  .s-en { color:var(--green); }
+  .s-busy { color:var(--amber); }
+  .s-critical { color:var(--red); animation:blink 1s infinite; }
+
+  /* ── SECTION TITLE ── */
+  .section { padding:80px 60px; }
+  .section-title {
+    font-family:'Rajdhani',sans-serif; font-weight:700;
+    font-size:2.2rem; letter-spacing:2px; color:var(--white);
+    display:flex; align-items:center; gap:14px; margin-bottom:8px;
+  }
+  .section-title .bar { width:4px; height:32px; border-radius:2px; }
+  .section-sub { color:var(--text-dim); font-size:.95rem; margin-bottom:48px; max-width:600px; }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+  }
+  .feature-card {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:12px; padding:28px 24px;
+    position:relative; overflow:hidden;
+    transition:.3s;
+  }
+  .feature-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  }
+  .feature-card.blue-card::before { background:linear-gradient(90deg,var(--blue),transparent); }
+  .feature-card.green-card::before { background:linear-gradient(90deg,var(--green),transparent); }
+  .feature-card.red-card::before { background:linear-gradient(90deg,var(--red),transparent); }
+  .feature-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+
+  .feat-icon { font-size:2.2rem; margin-bottom:16px; }
+  .feat-title {
+    font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700;
+    letter-spacing:1px; color:var(--white); margin-bottom:8px;
+  }
+  .feat-desc { font-size:.88rem; color:var(--text-dim); line-height:1.7; }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--dark); }
+  .steps { display:flex; gap:0; flex-wrap:wrap; }
+  .step {
+    flex:1; min-width:200px; padding:32px 28px;
+    position:relative; border-right:1px solid var(--border);
+  }
+  .step:last-child { border-right:none; }
+  .step-num {
+    font-family:'Share Tech Mono',monospace;
+    font-size:3rem; font-weight:700; line-height:1;
+    color:rgba(10,108,245,0.15); margin-bottom:12px;
+  }
+  .step-title {
+    font-family:'Rajdhani',sans-serif; font-size:1.15rem;
+    font-weight:700; color:var(--white); margin-bottom:8px;
+  }
+  .step-desc { font-size:.85rem; color:var(--text-dim); line-height:1.7; }
+  .step-icon { font-size:1.8rem; margin-bottom:12px; }
+
+  /* ── LIVE MAP SECTION ── */
+  .map-section { background: #060e17; }
+  .map-container {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; height:500px;
+    position:relative;
+  }
+  .map-overlay {
+    position:absolute; inset:0;
+    background: #08131d;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:16px;
+  }
+  /* Simulated city map */
+  .city-map { position:absolute; inset:0; overflow:hidden; }
+  .road-h, .road-v {
+    position:absolute; background:rgba(26,58,92,0.8);
+  }
+  .road-h { height:3px; left:0; right:0; }
+  .road-v { width:3px; top:0; bottom:0; }
+  .major-h { height:5px; background:rgba(10,108,245,0.3); }
+  .major-v { width:5px; background:rgba(10,108,245,0.3); }
+
+  /* Moving vehicles */
+  .vehicle {
+    position:absolute; font-size:.9rem;
+    animation: drive linear infinite;
+  }
+  @keyframes drive {
+    from{ transform:translateX(-40px); }
+    to{ transform:translateX(calc(100vw + 40px)); }
+  }
+  .amb-moving {
+    position:absolute; font-size:1.4rem;
+    filter:drop-shadow(0 0 12px var(--red));
+    animation: amb-drive 8s linear infinite;
+    z-index:10;
+  }
+  @keyframes amb-drive {
+    0%{ left:-5%; top:42%; }
+    40%{ left:40%; top:35%; }
+    70%{ left:65%; top:20%; }
+    100%{ left:105%; top:10%; }
+  }
+
+  /* Traffic congestion blobs */
+  .congestion {
+    position:absolute; border-radius:50%;
+    animation: cong-pulse 3s ease-in-out infinite;
+  }
+  @keyframes cong-pulse { 0%,100%{opacity:.5;transform:scale(1);} 50%{opacity:.9;transform:scale(1.15);} }
+
+  /* Map overlays */
+  .map-controls {
+    position:absolute; top:16px; left:16px;
+    display:flex; flex-direction:column; gap:8px; z-index:20;
+  }
+  .map-btn {
+    background:rgba(13,30,46,0.95); border:1px solid var(--border);
+    border-radius:6px; padding:8px 14px;
+    font-family:'Share Tech Mono',monospace; font-size:.72rem;
+    color:var(--text); cursor:pointer; transition:.2s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .map-btn:hover { border-color:var(--blue); color:var(--blue-bright); }
+  .map-btn.active { border-color:var(--green); color:var(--green); background:rgba(0,230,118,0.08); }
+
+  .map-legend {
+    position:absolute; bottom:16px; right:16px;
+    background:rgba(13,30,46,0.95); border:1px solid var(--border);
+    border-radius:8px; padding:16px; z-index:20;
+  }
+  .legend-title { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; margin-bottom:10px; color:var(--white); }
+  .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:7px; font-size:.78rem; color:var(--text-dim); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; }
+
+  /* Route path SVG */
+  .route-svg { position:absolute; inset:0; z-index:8; pointer-events:none; }
+
+  /* ── ALERTS ── */
+  .alerts-section { }
+  .alerts-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:768px){ .alerts-grid{ grid-template-columns:1fr; } }
+
+  .alert-panel {
+    background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  }
+  .alert-panel-header {
+    padding:14px 20px; display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid var(--border);
+  }
+  .alert-panel-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1.5px; }
+  .alert-count {
+    background:var(--red); color:#fff; border-radius:20px;
+    padding:2px 10px; font-size:.72rem; font-weight:700;
+  }
+  .alert-list { padding:12px; display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; }
+  .alert-item {
+    border-radius:8px; padding:12px 14px;
+    display:flex; gap:12px; align-items:flex-start;
+    animation: slide-in .4s ease;
+  }
+  @keyframes slide-in { from{opacity:0;transform:translateX(-12px);} to{opacity:1;transform:translateX(0);} }
+  .alert-item.critical { background:rgba(255,23,68,0.08); border:1px solid rgba(255,23,68,0.2); }
+  .alert-item.warning { background:rgba(255,145,0,0.08); border:1px solid rgba(255,145,0,0.2); }
+  .alert-item.info { background:rgba(10,108,245,0.08); border:1px solid rgba(10,108,245,0.2); }
+  .alert-item.success { background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2); }
+  .alert-badge { font-size:1.1rem; }
+  .alert-text-title { font-family:'Rajdhani',sans-serif; font-size:.92rem; font-weight:700; color:var(--white); margin-bottom:2px; }
+  .alert-text-sub { font-size:.75rem; color:var(--text-dim); }
+  .alert-time { font-family:'Share Tech Mono',monospace; font-size:.68rem; color:var(--text-dim); margin-left:auto; white-space:nowrap; }
+
+  /* ── METRICS ── */
+  .metrics-section { background:var(--dark); }
+  .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+  .metric-card {
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:24px 20px; text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .metric-val {
+    font-family:'Share Tech Mono',monospace;
+    font-size:2.5rem; font-weight:700; margin-bottom:4px;
+  }
+  .metric-label { font-size:.8rem; color:var(--text-dim); letter-spacing:1.5px; text-transform:uppercase; }
+  .metric-trend { font-size:.75rem; margin-top:8px; }
+  .trend-up { color:var(--green); }
+  .trend-down { color:var(--red); }
+  .metric-ring {
+    position:absolute; top:-20px; right:-20px;
+    width:80px; height:80px; border-radius:50%;
+    opacity:.1;
+  }
+
+  /* ── TECH STACK ── */
+  .tech-section { }
+  .tech-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; }
+  .tech-card {
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:20px; text-align:center; transition:.25s;
+  }
+  .tech-card:hover { border-color:var(--blue); box-shadow:0 0 20px var(--blue-glow); }
+  .tech-icon { font-size:2rem; margin-bottom:10px; }
+  .tech-name { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--white); }
+  .tech-role { font-size:.75rem; color:var(--text-dim); margin-top:4px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); border-top:1px solid var(--border);
+    padding:40px 60px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+  }
+  .footer-logo { font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; color:var(--white); }
+  .footer-logo span { color:var(--blue-bright); }
+  .footer-info { font-size:.8rem; color:var(--text-dim); line-height:1.8; }
+  .footer-tags { display:flex; gap:10px; flex-wrap:wrap; }
+  .footer-tag {
+    background:rgba(10,108,245,0.1); border:1px solid rgba(10,108,245,0.25);
+    border-radius:4px; padding:4px 12px;
+    font-size:.73rem; color:var(--blue-bright);
+    font-family:'Share Tech Mono',monospace;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    .hero{ padding:100px 24px 60px; }
+    .section{ padding:60px 24px; }
+    header{ padding:0 20px; }
+    nav{ display:none; }
+    footer{ padding:30px 24px; flex-direction:column; align-items:flex-start; }
+    .steps{ flex-direction:column; }
+    .step{ border-right:none; border-bottom:1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🚑</div>
+    AMBULANCE<span>IQ</span>
+  </div>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#map">Live Map</a>
+    <a href="#alerts">Alerts</a>
+    <a href="#tech">Tech Stack</a>
+  </nav>
+  <div class="nav-status">
+    <div class="dot"></div>
+    SYSTEM ONLINE
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">
+      🏥 HEALTHCARE · MINI PROJECT
+    </div>
+    <h1>Smart <span class="accent">Ambulance</span><br>Navigation with<br><span class="accent2">Live Congestion</span></h1>
+    <p>AI-powered route optimization for emergency vehicles, integrating real-time traffic data, automatic signal preemption, and hospital capacity monitoring to save critical response minutes.</p>
+    <div class="hero-btns">
+      <a href="#map" class="btn-primary">View Live Map</a>
+      <a href="#how" class="btn-outline">How It Works</a>
+    </div>
+  </div>
+
+  <!-- Mini Dashboard -->
+  <div class="dashboard">
+    <div class="dash-panel">
+      <div class="dash-header">
+        <span class="dash-title">DISPATCH CENTER</span>
+        <span class="dash-live"><div class="dot"></div>LIVE</span>
+      </div>
+
+      <!-- Mini Map -->
+      <div class="map-area">
+        <!-- Road grid -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 440 240">
+          <!-- Horizontal roads -->
+          <line x1="0" y1="60" x2="440" y2="60" stroke="rgba(26,58,92,0.7)" stroke-width="2"/>
+          <line x1="0" y1="120" x2="440" y2="120" stroke="rgba(10,108,245,0.25)" stroke-width="4"/>
+          <line x1="0" y1="180" x2="440" y2="180" stroke="rgba(26,58,92,0.7)" stroke-width="2"/>
+          <!-- Vertical roads -->
+          <line x1="80" y1="0" x2="80" y2="240" stroke="rgba(26,58,92,0.7)" stroke-width="2"/>
+          <line x1="200" y1="0" x2="200" y2="240" stroke="rgba(10,108,245,0.25)" stroke-width="4"/>
+          <line x1="320" y1="0" x2="320" y2="240" stroke="rgba(26,58,92,0.7)" stroke-width="2"/>
+          <!-- Diagonal route -->
+          <polyline points="40,200 120,160 200,120 300,70 400,30"
+            fill="none" stroke="rgba(0,230,118,0.6)" stroke-width="2.5" stroke-dasharray="8,5">
+            <animate attributeName="stroke-dashoffset" values="0;-26" dur="1s" repeatCount="indefinite"/>
+          </polyline>
+          <!-- Congestion blobs -->
+          <ellipse cx="160" cy="120" rx="30" ry="16" fill="rgba(255,23,68,0.2)" stroke="rgba(255,23,68,0.4)" stroke-width="1"/>
+          <ellipse cx="310" cy="80" rx="22" ry="14" fill="rgba(255,145,0,0.2)" stroke="rgba(255,145,0,0.35)" stroke-width="1"/>
+        </svg>
+        <!-- Traffic lights -->
+        <div class="traffic-light t-red" style="left:75px;top:115px;"></div>
+        <div class="traffic-light t-green" style="left:195px;top:55px;"></div>
+        <div class="traffic-light t-amber" style="left:315px;top:175px;"></div>
+        <!-- Hospital -->
+        <div style="position:absolute;right:20px;top:12px;font-size:1.1rem;filter:drop-shadow(0 0 6px rgba(0,230,118,0.6));">🏥</div>
+        <!-- Ambulance -->
+        <div class="ambulance-icon">🚑</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-cell">
+          <div class="stat-val red" id="eta">4:32</div>
+          <div class="stat-label">ETA (min)</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val blue" id="speed">68</div>
+          <div class="stat-label">km/h</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val green" id="signals">3</div>
+          <div class="stat-label">Signals Cleared</div>
+        </div>
+      </div>
+
+      <div class="amb-list">
+        <div class="amb-item">
+          <span class="amb-num">AMB-01</span>
+          <div class="amb-bar-wrap"><div class="amb-bar bar-red" style="width:85%;"></div></div>
+          <span class="amb-status s-critical">CRITICAL</span>
+        </div>
+        <div class="amb-item">
+          <span class="amb-num">AMB-02</span>
+          <div class="amb-bar-wrap"><div class="amb-bar bar-amber" style="width:50%;"></div></div>
+          <span class="amb-status s-busy">EN ROUTE</span>
+        </div>
+        <div class="amb-item">
+          <span class="amb-num">AMB-03</span>
+          <div class="amb-bar-wrap"><div class="amb-bar bar-green" style="width:20%;"></div></div>
+          <span class="amb-status s-en">STANDBY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-title">
+    <div class="bar" style="background:var(--blue);"></div>
+    CORE FEATURES
+  </div>
+  <p class="section-sub">Intelligent systems working in tandem to minimize emergency response time and maximize patient survival rates.</p>
+
+  <div class="features-grid">
+    <div class="feature-card blue-card">
+      <div class="feat-icon">🗺️</div>
+      <div class="feat-title">REAL-TIME ROUTE OPTIMIZATION</div>
+      <div class="feat-desc">Dynamic path recalculation using live traffic feeds, accident data, and road closure reports updated every 30 seconds for the fastest route.</div>
+    </div>
+    <div class="feature-card green-card">
+      <div class="feat-icon">🚦</div>
+      <div class="feat-title">SIGNAL PREEMPTION SYSTEM</div>
+      <div class="feat-desc">Automatically communicates with traffic signal controllers to turn signals green up to 300 meters ahead of the approaching ambulance.</div>
+    </div>
+    <div class="feature-card red-card">
+      <div class="feat-icon">📡</div>
+      <div class="feat-title">LIVE CONGESTION HEATMAP</div>
+      <div class="feat-desc">Visual overlay of traffic congestion data sourced from GPS fleets, roadside sensors, and crowd-sourced reports across the entire city grid.</div>
+    </div>
+    <div class="feature-card blue-card">
+      <div class="feat-icon">🏥</div>
+      <div class="feat-title">HOSPITAL CAPACITY MONITOR</div>
+      <div class="feat-desc">Real-time bed availability, ICU capacity, and specialist on-duty status across all hospitals to route patients to the best possible facility.</div>
+    </div>
+    <div class="feature-card green-card">
+      <div class="feat-icon">📲</div>
+      <div class="feat-title">DRIVER MOBILE INTERFACE</div>
+      <div class="feat-desc">Turn-by-turn navigation with voice guidance designed for emergency driving, showing congestion levels and optimal lane choices ahead.</div>
+    </div>
+    <div class="feature-card red-card">
+      <div class="feat-icon">🔔</div>
+      <div class="feat-title">DISPATCH ALERT SYSTEM</div>
+      <div class="feat-desc">Automated public notifications via SMS and app alerts to clear path for emergency vehicles, reducing average clearance time by 40%.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-section" id="how">
+  <div class="section-title">
+    <div class="bar" style="background:var(--green);"></div>
+    HOW IT WORKS
+  </div>
+  <p class="section-sub">A seamless pipeline from emergency call to hospital arrival, powered by intelligent algorithms.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📞</div>
+      <div class="step-title">EMERGENCY CALL</div>
+      <div class="step-desc">Patient call received at control center. Dispatcher logs incident type, severity, and location coordinates into the system.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">🚑</div>
+      <div class="step-title">UNIT DISPATCH</div>
+      <div class="step-desc">Nearest available ambulance identified using GPS fleet tracking. Optimal unit dispatched with pre-loaded route in under 30 seconds.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">📡</div>
+      <div class="step-title">CONGESTION ANALYSIS</div>
+      <div class="step-desc">AI engine fetches live traffic data, calculates 3 alternate routes, selects fastest path with real-time rerouting capability.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-icon">🚦</div>
+      <div class="step-title">SIGNAL CLEARANCE</div>
+      <div class="step-desc">Connected traffic infrastructure receives preemption commands, turning all signals green along the ambulance's confirmed route.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-icon">🏥</div>
+      <div class="step-title">HOSPITAL READY</div>
+      <div class="step-desc">Receiving hospital is pre-alerted with patient vitals, ETA, and resource needs. Emergency team assembled before arrival.</div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE MAP -->
+<section class="section map-section" id="map">
+  <div class="section-title">
+    <div class="bar" style="background:var(--red);"></div>
+    LIVE NAVIGATION MAP
+  </div>
+  <p class="section-sub">Real-time visualization of active ambulances, congestion zones, and optimized routes across the city grid.</p>
+
+  <div class="map-container">
+    <!-- Simulated city grid -->
+    <div class="city-map">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
+        <!-- Background -->
+        <rect width="900" height="500" fill="#08131d"/>
+
+        <!-- City blocks -->
+        <rect x="20" y="20" width="100" height="70" fill="#0a1a28" rx="2"/>
+        <rect x="140" y="20" width="80" height="70" fill="#0a1a28" rx="2"/>
+        <rect x="240" y="20" width="120" height="70" fill="#0a1a28" rx="2"/>
+        <rect x="20" y="110" width="60" height="80" fill="#0a1a28" rx="2"/>
+        <rect x="100" y="110" width="120" height="40" fill="#0a1a28" rx="2"/>
+        <rect x="340" y="60" width="80" height="100" fill="#0a1a28" rx="2"/>
+        <rect x="450" y="20" width="100" height="60" fill="#0a1a28" rx="2"/>
+        <rect x="580" y="30" width="70" height="80" fill="#0a1a28" rx="2"/>
+        <rect x="680" y="20" width="110" height="50" fill="#0a1a28" rx="2"/>
+        <rect x="800" y="20" width="80" height="90" fill="#0a1a28" rx="2"/>
+        <rect x="20" y="220" width="140" height="80" fill="#0a1a28" rx="2"/>
+        <rect x="200" y="220" width="100" height="60" fill="#0a1a28" rx="2"/>
+        <rect x="340" y="200" width="80" height="90" fill="#0a1a28" rx="2"/>
+        <rect x="600" y="200" width="120" height="70" fill="#0a1a28" rx="2"/>
+        <rect x="750" y="180" width="100" height="100" fill="#0a1a28" rx="2"/>
+        <rect x="20" y="360" width="120" height="100" fill="#0a1a28" rx="2"/>
+        <rect x="180" y="350" width="80" height="80" fill="#0a1a28" rx="2"/>
+        <rect x="400" y="370" width="100" height="90" fill="#0a1a28" rx="2"/>
+        <rect x="560" y="360" width="80" height="100" fill="#0a1a28" rx="2"/>
+        <rect x="700" y="360" width="170" height="100" fill="#0a1a28" rx="2"/>
+
+        <!-- Major roads -->
+        <line x1="0" y1="100" x2="900" y2="100" stroke="rgba(10,108,245,0.3)" stroke-width="6"/>
+        <line x1="0" y1="200" x2="900" y2="200" stroke="rgba(26,58,92,0.8)" stroke-width="4"/>
+        <line x1="0" y1="320" x2="900" y2="320" stroke="rgba(10,108,245,0.3)" stroke-width="6"/>
+        <line x1="0" y1="420" x2="900" y2="420" stroke="rgba(26,58,92,0.8)" stroke-width="4"/>
+        <line x1="130" y1="0" x2="130" y2="500" stroke="rgba(26,58,92,0.8)" stroke-width="4"/>
+        <line x1="280" y1="0" x2="280" y2="500" stroke="rgba(10,108,245,0.3)" stroke-width="6"/>
+        <line x1="440" y1="0" x2="440" y2="500" stroke="rgba(26,58,92,0.8)" stroke-width="4"/>
+        <line x1="580" y1="0" x2="580" y2="500" stroke="rgba(10,108,245,0.3)" stroke-width="6"/>
+        <line x1="730" y1="0" x2="730" y2="500" stroke="rgba(26,58,92,0.8)" stroke-width="4"/>
+
+        <!-- Congestion zones -->
+        <ellipse cx="200" cy="200" rx="60" ry="35" fill="rgba(255,23,68,0.18)" stroke="rgba(255,23,68,0.35)" stroke-width="1">
+          <animate attributeName="rx" values="60;68;60" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="500" cy="320" rx="80" ry="30" fill="rgba(255,145,0,0.15)" stroke="rgba(255,145,0,0.3)" stroke-width="1">
+          <animate attributeName="rx" values="80;90;80" dur="4s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="720" cy="200" rx="50" ry="28" fill="rgba(255,23,68,0.15)" stroke="rgba(255,23,68,0.25)" stroke-width="1">
+          <animate attributeName="rx" values="50;58;50" dur="2.5s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Optimized route -->
+        <polyline points="50,420 130,320 280,260 280,200 440,200 580,100 730,100 870,60"
+          fill="none" stroke="rgba(0,230,118,0.7)" stroke-width="3" stroke-dasharray="12,6">
+          <animate attributeName="stroke-dashoffset" values="0;-36" dur="1.2s" repeatCount="indefinite"/>
+        </polyline>
+
+        <!-- Hospitals -->
+        <text x="860" y="55" font-size="20" text-anchor="middle">🏥</text>
+        <circle cx="860" cy="50" r="18" fill="none" stroke="rgba(0,230,118,0.4)" stroke-width="2">
+          <animate attributeName="r" values="18;24;18" dur="2s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Static vehicles -->
+        <text x="400" y="330" font-size="12">🚗</text>
+        <text x="480" y="328" font-size="12">🚕</text>
+        <text x="350" y="325" font-size="12">🚌</text>
+        <text x="180" y="108" font-size="12">🚗</text>
+        <text x="600" y="108" font-size="12">🚕</text>
+
+        <!-- Animated ambulance -->
+        <text font-size="22" filter="url(#glow)">
+          🚑
+          <animateMotion dur="10s" repeatCount="indefinite"
+            path="M50,430 L130,330 L280,270 L280,210 L440,210 L580,110 L730,110 L870,65"/>
+        </text>
+
+        <!-- Traffic signals -->
+        <circle cx="130" cy="198" r="5" fill="#ff1744">
+          <animate attributeName="fill" values="#ff1744;#00e676;#ff1744" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="280" cy="102" r="5" fill="#00e676"/>
+        <circle cx="440" cy="318" r="5" fill="#ff9100">
+          <animate attributeName="fill" values="#ff9100;#ff1744;#ff9100" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="580" cy="198" r="5" fill="#00e676"/>
+        <circle cx="730" cy="102" r="5" fill="#00e676"/>
+
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Controls -->
+    <div class="map-controls">
+      <div class="map-btn active">📡 CONGESTION LAYER</div>
+      <div class="map-btn active">🚑 AMBULANCES</div>
+      <div class="map-btn">🏥 HOSPITALS</div>
+      <div class="map-btn">🚦 SIGNALS</div>
+    </div>
+
+    <!-- Legend -->
+    <div class="map-legend">
+      <div class="legend-title">MAP LEGEND</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> Optimal Route</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red);box-shadow:0 0 6px var(--red);"></div> High Congestion</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div> Moderate Traffic</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-bright);"></div> Clear Path</div>
+      <div class="legend-item">🚑 Active Ambulance</div>
+      <div class="legend-item">🏥 Hospital</div>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section class="section" id="alerts">
+  <div class="section-title">
+    <div class="bar" style="background:var(--amber);"></div>
+    LIVE ALERTS & DISPATCH LOG
+  </div>
+  <p class="section-sub">Real-time event feed from dispatch center, traffic management, and field units.</p>
+
+  <div class="alerts-grid">
+    <div class="alert-panel">
+      <div class="alert-panel-header">
+        <span class="alert-panel-title" style="color:var(--red);">🔴 ACTIVE EMERGENCIES</span>
+        <span class="alert-count" id="active-count">3</span>
+      </div>
+      <div class="alert-list" id="alert-list">
+        <div class="alert-item critical">
+          <span class="alert-badge">🚨</span>
+          <div>
+            <div class="alert-text-title">Cardiac Arrest — Anna Nagar</div>
+            <div class="alert-text-sub">AMB-01 dispatched · ETA 4 min · Route via Cathedral Rd</div>
+          </div>
+          <span class="alert-time">14:32</span>
+        </div>
+        <div class="alert-item warning">
+          <span class="alert-badge">⚠️</span>
+          <div>
+            <div class="alert-text-title">Congestion Detected — OMR Highway</div>
+            <div class="alert-text-sub">AMB-02 rerouted via ECR · +2 min added</div>
+          </div>
+          <span class="alert-time">14:30</span>
+        </div>
+        <div class="alert-item critical">
+          <span class="alert-badge">🚨</span>
+          <div>
+            <div class="alert-text-title">Trauma Case — T Nagar Junction</div>
+            <div class="alert-text-sub">AMB-03 dispatched · ETA 7 min · Signals preempted</div>
+          </div>
+          <span class="alert-time">14:28</span>
+        </div>
+        <div class="alert-item info">
+          <span class="alert-badge">ℹ️</span>
+          <div>
+            <div class="alert-text-title">Signal Override — Gemini Flyover</div>
+            <div class="alert-text-sub">5 signals cleared for AMB-01 passage</div>
+          </div>
+          <span class="alert-time">14:27</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-panel">
+      <div class="alert-panel-header">
+        <span class="alert-panel-title" style="color:var(--green);">🟢 DISPATCH LOG</span>
+        <span class="alert-count" style="background:var(--green);">12</span>
+      </div>
+      <div class="alert-list">
+        <div class="alert-item success">
+          <span class="alert-badge">✅</span>
+          <div>
+            <div class="alert-text-title">Patient Delivered — Apollo Hospital</div>
+            <div class="alert-text-sub">AMB-04 · Response time: 6.2 min · ICU ready</div>
+          </div>
+          <span class="alert-time">14:25</span>
+        </div>
+        <div class="alert-item success">
+          <span class="alert-badge">✅</span>
+          <div>
+            <div class="alert-text-title">Mission Complete — MIOT Hospital</div>
+            <div class="alert-text-sub">AMB-02 · Avg speed 72km/h · 3 signals cleared</div>
+          </div>
+          <span class="alert-time">14:18</span>
+        </div>
+        <div class="alert-item info">
+          <span class="alert-badge">📋</span>
+          <div>
+            <div class="alert-text-title">Hospital Capacity Update</div>
+            <div class="alert-text-sub">Fortis: 8 beds available · ICU: 3 units free</div>
+          </div>
+          <span class="alert-time">14:15</span>
+        </div>
+        <div class="alert-item success">
+          <span class="alert-badge">✅</span>
+          <div>
+            <div class="alert-text-title">Shift Handover Complete</div>
+            <div class="alert-text-sub">6 units active · 2 on standby · System nominal</div>
+          </div>
+          <span class="alert-time">14:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section class="section metrics-section" id="metrics">
+  <div class="section-title">
+    <div class="bar" style="background:var(--green);"></div>
+    PERFORMANCE METRICS
+  </div>
+  <p class="section-sub">Key performance indicators measured across all active emergency response operations.</p>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--red);"></div>
+      <div class="metric-val red" id="m1">5.8</div>
+      <div class="metric-label">Avg Response (min)</div>
+      <div class="metric-trend trend-up">▼ 28% faster than manual</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--blue);"></div>
+      <div class="metric-val blue" id="m2">94</div>
+      <div class="metric-label">Success Rate %</div>
+      <div class="metric-trend trend-up">▲ +12% this month</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--green);"></div>
+      <div class="metric-val green" id="m3">1,243</div>
+      <div class="metric-label">Signals Cleared</div>
+      <div class="metric-trend trend-up">▲ Total this week</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--blue);"></div>
+      <div class="metric-val blue" id="m4">8</div>
+      <div class="metric-label">Active Units</div>
+      <div class="metric-trend">● 2 on standby</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--green);"></div>
+      <div class="metric-val green" id="m5">72</div>
+      <div class="metric-label">Avg Speed km/h</div>
+      <div class="metric-trend trend-up">▲ +15% optimized</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-ring" style="background:var(--red);"></div>
+      <div class="metric-val red" id="m6">127</div>
+      <div class="metric-label">Trips Today</div>
+      <div class="metric-trend trend-down">▼ 14 in last hour</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="section tech-section" id="tech">
+  <div class="section-title">
+    <div class="bar" style="background:var(--blue);"></div>
+    TECHNOLOGY STACK
+  </div>
+  <p class="section-sub">Built with modern, scalable technologies designed for real-time emergency response requirements.</p>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-icon">⚛️</div>
+      <div class="tech-name">React.js</div>
+      <div class="tech-role">Frontend UI</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🟢</div>
+      <div class="tech-name">Node.js</div>
+      <div class="tech-role">Backend Server</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🗺️</div>
+      <div class="tech-name">Google Maps API</div>
+      <div class="tech-role">Navigation & Routes</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🔴</div>
+      <div class="tech-name">MongoDB</div>
+      <div class="tech-role">Database</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">📡</div>
+      <div class="tech-name">WebSocket</div>
+      <div class="tech-role">Real-time Updates</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🐍</div>
+      <div class="tech-name">Python / ML</div>
+      <div class="tech-role">Congestion Prediction</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">☁️</div>
+      <div class="tech-name">AWS / Firebase</div>
+      <div class="tech-role">Cloud Hosting</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">📲</div>
+      <div class="tech-name">React Native</div>
+      <div class="tech-role">Mobile App</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">AMBULANCE<span>IQ</span></div>
+    <div class="footer-info" style="margin-top:8px;">
+      Smart Ambulance Navigation with Live Congestion Data<br>
+      Domain: Healthcare · Mini Project · 2024
+    </div>
+  </div>
+  <div class="footer-tags">
+    <span class="footer-tag">HEALTHCARE</span>
+    <span class="footer-tag">IoT</span>
+    <span class="footer-tag">REAL-TIME</span>
+    <span class="footer-tag">ML/AI</span>
+    <span class="footer-tag">EMERGENCY</span>
+  </div>
+  <div class="footer-info" style="text-align:right;">
+    System Status: <span style="color:var(--green);">● ONLINE</span><br>
+    Last Update: <span style="font-family:'Share Tech Mono',monospace;" id="footer-time">—</span>
+  </div>
+</footer>
+
+<script>
+  // Live clock
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('footer-time').textContent = now.toLocaleTimeString();
+  }
+  setInterval(updateTime, 1000); updateTime();
+
+  // Animate stats
+  function randBetween(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+  function animateStats() {
+    document.getElementById('eta').textContent = `${randBetween(3,7)}:${randBetween(10,59).toString().padStart(2,'0')}`;
+    document.getElementById('speed').textContent = randBetween(55, 85);
+    document.getElementById('signals').textContent = randBetween(2, 6);
+    document.getElementById('m1').textContent = (Math.random() * 2 + 4.5).toFixed(1);
+    document.getElementById('m2').textContent = randBetween(91, 97);
+    document.getElementById('m3').textContent = (1200 + randBetween(0,100)).toLocaleString();
+    document.getElementById('m6').textContent = randBetween(115, 135);
+  }
+  setInterval(animateStats, 3000);
+
+  // Alert injection
+  const newAlerts = [
+    { type:'critical', icon:'🚨', title:'MVA — Mount Road', sub:'AMB-05 dispatched · ETA 5 min', time: null },
+    { type:'info',     icon:'ℹ️', title:'Traffic Clear — Anna Salai', sub:'Route restored · Speed normal', time: null },
+    { type:'success',  icon:'✅', title:'Delivery — Vijaya Hospital', sub:'AMB-01 completed · Response 5.1 min', time: null },
+    { type:'warning',  icon:'⚠️', title:'Roadblock — Kathipara', sub:'AMB-03 rerouted via GST Rd', time: null },
+  ];
+  let alertIdx = 0;
+  setInterval(() => {
+    const list = document.getElementById('alert-list');
+    const a = newAlerts[alertIdx % newAlerts.length]; alertIdx++;
+    const now = new Date();
+    const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+    const div = document.createElement('div');
+    div.className = `alert-item ${a.type}`;
+    div.innerHTML = `<span class="alert-badge">${a.icon}</span>
+      <div><div class="alert-text-title">${a.title}</div>
+      <div class="alert-text-sub">${a.sub}</div></div>
+      <span class="alert-time">${timeStr}</span>`;
+    list.prepend(div);
+    if(list.children.length > 6) list.removeChild(list.lastChild);
+    const cnt = document.getElementById('active-count');
+    cnt.textContent = Math.max(1, parseInt(cnt.textContent) + (a.type==='critical'?1:-1));
+  }, 5000);
+
+  // Map button toggles
+  document.querySelectorAll('.map-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('active'));
+  });
+</script>
+</body>
+</html>
