@@ -106,8 +106,7 @@ Step 4 - Patient Reached
 | Traffic Delay  | Minimized           |
 
 ## 🌐 Live Demo
-View live project here:
-[AmbulanceIQ - Live Demo]
+View live project here: https://gopikababu67-lang.github.io/smart-ambulance-navigation/
 
 ## 📁 Project Files
 - index.html - Main project file
